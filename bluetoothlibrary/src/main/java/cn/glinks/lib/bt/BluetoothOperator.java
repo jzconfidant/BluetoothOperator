@@ -65,7 +65,10 @@ public class BluetoothOperator {
                 case CMD_CONNECT:
                     if (mCallbacks.size() > 0) {
                         for (BluetoothOperationCallback callback : mCallbacks) {
-                            callback.onConnect(0, "connect success");
+                            if (msg.arg1 == -1)
+                                callback.onConnect(-1, "connect fail");
+                            else
+                                callback.onConnect(0, "connect success");
                         }
                     }
                     break;
@@ -326,6 +329,10 @@ public class BluetoothOperator {
                     if (DBG) Log.d(TAG, "connected");
                 } catch (IOException e1) {
                     Log.e(TAG, "connect to bluetooth device failed");
+                    Message msg = mRecvHandler.obtainMessage();
+                    msg.what = CMD_CONNECT;
+                    msg.arg1 = -1;
+                    msg.sendToTarget();
                     try {
                         mmSocket.close();
                     } catch (IOException e2) {
